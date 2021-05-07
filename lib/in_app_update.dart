@@ -11,15 +11,21 @@ class InAppUpdate {
   /// [startFlexibleUpdate] or [performImmediateUpdate] should be called.
   static Future<AppUpdateInfo> checkForUpdate() async {
     final result = await _channel.invokeMethod('checkForUpdate');
-    return AppUpdateInfo(result['updateAvailable'], result['immediateAllowed'], result['flexibleAllowed'],
-        result['availableVersionCode']);
+    return AppUpdateInfo(result['updateAvailable'], result['immediateAllowed'],
+        result['flexibleAllowed'], result['availableVersionCode']);
   }
 
   /// Performs an immediate update that is entirely handled by the Play API.
   ///
   /// [checkForUpdate] has to be called first to be able to run this.
   static Future<void> performImmediateUpdate() async {
-    return await _channel.invokeMethod('performImmediateUpdate');
+    try {
+      await _channel.invokeMethod('performImmediateUpdate');
+    } on PlatformException catch (platformException) {
+      throw platformException;
+    } catch (e) {
+      throw e;
+    }
   }
 
   /// Starts the download of the app update.
@@ -44,8 +50,8 @@ class AppUpdateInfo {
   final bool updateAvailable, immediateUpdateAllowed, flexibleUpdateAllowed;
   final int availableVersionCode;
 
-  AppUpdateInfo(
-      this.updateAvailable, this.immediateUpdateAllowed, this.flexibleUpdateAllowed, this.availableVersionCode);
+  AppUpdateInfo(this.updateAvailable, this.immediateUpdateAllowed,
+      this.flexibleUpdateAllowed, this.availableVersionCode);
 
   @override
   bool operator ==(Object other) =>
