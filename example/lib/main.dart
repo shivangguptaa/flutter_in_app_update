@@ -11,11 +11,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  AppUpdateInfo? _updateInfo;
+  AppUpdateInfo _updateInfo;
 
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
   bool _flexibleUpdateAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> checkForUpdate() async {
@@ -23,16 +28,11 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _updateInfo = info;
       });
-    }).catchError((e) {
-      showSnack(e.toString());
-    });
+    }).catchError((e) => _showError(e));
   }
 
-  void showSnack(String text) {
-    if (_scaffoldKey.currentContext != null) {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!)
-          .showSnackBar(SnackBar(content: Text(text)));
-    }
+  void _showError(dynamic exception) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(exception.toString())));
   }
 
   @override
@@ -50,45 +50,38 @@ class _MyAppState extends State<MyApp> {
               Center(
                 child: Text('Update info: $_updateInfo'),
               ),
-              ElevatedButton(
+              RaisedButton(
                 child: Text('Check for Update'),
                 onPressed: () => checkForUpdate(),
               ),
-              ElevatedButton(
+              RaisedButton(
                 child: Text('Perform immediate update'),
-                onPressed: _updateInfo?.updateAvailability ==
-                        UpdateAvailability.updateAvailable
+                onPressed: _updateInfo?.updateAvailable == true
                     ? () {
-                        InAppUpdate.performImmediateUpdate()
-                            .catchError((e) => showSnack(e.toString()));
+                        InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
                       }
                     : null,
               ),
-              ElevatedButton(
+              RaisedButton(
                 child: Text('Start flexible update'),
-                onPressed: _updateInfo?.updateAvailability ==
-                        UpdateAvailability.updateAvailable
+                onPressed: _updateInfo?.updateAvailable == true
                     ? () {
                         InAppUpdate.startFlexibleUpdate().then((_) {
                           setState(() {
                             _flexibleUpdateAvailable = true;
                           });
-                        }).catchError((e) {
-                          showSnack(e.toString());
-                        });
+                        }).catchError((e) => _showError(e));
                       }
                     : null,
               ),
-              ElevatedButton(
+              RaisedButton(
                 child: Text('Complete flexible update'),
                 onPressed: !_flexibleUpdateAvailable
                     ? null
                     : () {
                         InAppUpdate.completeFlexibleUpdate().then((_) {
-                          showSnack("Success!");
-                        }).catchError((e) {
-                          showSnack(e.toString());
-                        });
+                          _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('Success!')));
+                        }).catchError((e) => _showError(e));
                       },
               )
             ],
