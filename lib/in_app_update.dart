@@ -47,8 +47,8 @@ class InAppUpdate {
 }
 
 class AppUpdateInfo {
-  final bool updateAvailable, immediateUpdateAllowed, flexibleUpdateAllowed;
-  final int availableVersionCode;
+  final bool? updateAvailable, immediateUpdateAllowed, flexibleUpdateAllowed;
+  final int? availableVersionCode;
 
   AppUpdateInfo(this.updateAvailable, this.immediateUpdateAllowed,
       this.flexibleUpdateAllowed, this.availableVersionCode);
